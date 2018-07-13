@@ -1,0 +1,17 @@
+bgp attributes
+
+
+aspath
+local preference
+origin
+med
+
+
+
+
+1.	bgp adjecency
+2.	test regex  show ip bgp regexp 222|333
+3.	ip as-path access list "1" permit/deny *regex*
+4.	route-map "name" permit 10
+	match as-path "1"
+5.	neighbour "address" route-map "REGEX" in    <----------- (in -- very important)

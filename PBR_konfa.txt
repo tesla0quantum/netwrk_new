@@ -1,0 +1,35 @@
+PBR configuration steps
+
+ACL
+SLA
+TRACK
+ROUTE-MAP
+
+
+APPLY to interface ROUTE-MAP
+test
+
+IP access list 100
+    10 permit ip host 192.168.10.254 host 8.8.8.8
+** access list must be extended
+
+ip sla 1
+ icmp-echo 192.168.23.2 source-ip 192.168.23.3
+ frequency 5
+
+track 99 ip sla 1 reachability
+
+
+R3#sho run | sec route-map
+ ip policy route-map PBR
+route-map PBR permit 10
+ match ip address 100
+ set ip next-hop verify-availability 192.168.23.2 1 track 99
+
+
+interface what/ever you conf --- just remember that must be first to face packet for PBR to work
+ description PC
+ ip address 192.168.10.1 255.255.255.0
+ ip policy route-map PBR
+end
+
