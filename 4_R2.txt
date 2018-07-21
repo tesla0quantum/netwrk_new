@@ -1,0 +1,172 @@
+hostname R2
+!
+boot-start-marker
+boot-end-marker
+!
+!
+no aaa new-model
+!
+!
+!
+ip source-route
+no ip icmp rate-limit unreachable
+ip cef
+!
+!
+!
+!
+no ip domain lookup
+no ipv6 cef
+!
+multilink bundle-name authenticated
+!
+!
+!
+!
+!
+!
+!
+!
+!
+redundancy
+!
+!
+ip tcp synwait-time 5
+!
+track 10 ip sla 1 reachability
+!
+!
+!
+!
+!
+!
+!
+!
+interface Ethernet0/0
+ no ip address
+ shutdown
+ duplex auto
+ !
+!
+interface GigabitEthernet0/0
+ ip address 192.168.12.2 255.255.255.0
+ ip policy route-map MAP
+ duplex full
+ speed 1000
+ media-type gbic
+ negotiation auto
+ !
+!
+interface GigabitEthernet1/0
+ ip address 10.10.24.2 255.255.255.0
+ negotiation auto
+ !
+!
+interface Serial2/0
+ ip address 10.10.23.2 255.255.255.0
+ serial restart-delay 0
+ !
+!
+interface Serial2/1
+ no ip address
+ shutdown
+ serial restart-delay 0
+ !
+!
+interface Serial2/2
+ no ip address
+ shutdown
+ serial restart-delay 0
+ !
+!
+interface Serial2/3
+ no ip address
+ shutdown
+ serial restart-delay 0
+ !
+!
+interface FastEthernet3/0
+ no ip address
+ shutdown
+ duplex auto
+ speed auto
+ !
+!
+interface FastEthernet3/1
+ no ip address
+ shutdown
+ duplex auto
+ speed auto
+ !
+!
+interface FastEthernet4/0
+ no ip address
+ shutdown
+ duplex auto
+ speed auto
+ !
+!
+interface FastEthernet4/1
+ no ip address
+ shutdown
+ duplex auto
+ speed auto
+ !
+!
+router ospf 1
+ log-adjacency-changes
+ network 10.0.0.0 0.255.255.255 area 0
+ network 192.168.12.0 0.0.0.255 area 0
+!
+ip forward-protocol nd
+no ip http server
+no ip http secure-server
+!
+!
+!
+ip access-list extended PBR
+ permit ip host 192.168.12.1 host 8.8.8.8
+!
+ip sla 1
+ icmp-echo 10.10.23.3 source-ip 10.10.23.2
+ frequency 5
+ip sla schedule 1 life forever start-time now
+no cdp log mismatch duplex
+!
+!
+!
+!
+route-map MAP permit 10
+ match ip address PBR
+ set ip next-hop verify-availability 10.10.23.3 1 track 10
+!
+!
+!
+control-plane
+ !
+!
+!
+mgcp fax t38 ecm
+mgcp behavior g729-variants static-pt
+!
+!
+!
+gatekeeper
+ shutdown
+!
+!
+line con 0
+ exec-timeout 0 0
+ privilege level 15
+ logging synchronous
+ stopbits 1
+line aux 0
+ exec-timeout 0 0
+ privilege level 15
+ logging synchronous
+ stopbits 1
+line vty 0 4
+ login
+!
+end
+

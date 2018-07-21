@@ -1,0 +1,60 @@
+SLA:
+==========================================================================================
+1.)
+ip access-list extended PBR_LIST
+permit ip 192.168.0.0 0.0.0.255 any	*** subnet od PC-a
+
+2.)
+ip sla 1
+icmp-echo 1.2.3.4 source-interface FastEthernet1/1	*** interface koji gleda prema PC-u
+frequency 5
+
+3.)
+ip sla schedule 1 life forever start-time now
+
+4.)
+track 50 ip sla 1 reachability
+
+5.)
+route-map PBR_MAP
+match ip address PBR_LIST
+set ip next-hop verify-availability 193.10.12.2 1 track 50	*** ip adresa interface-a na koji promet ide po SLA
+
+6.)
+interface fastEthernet 1/1	*** interface koji gleda prema PC-u
+ip policy route-map PBR_MAP
+
+
+NAT:
+============================================================================================
+1.)
+ip access-list extended NAT
+permit ip 192.168.0.0 0.0.0.255 any
+permit ip 193.10.12.0 0.0.0.255 any
+permit ip 193.10.13.0 0.0.0.255 any
+permit ip 193.10.23.0 0.0.0.255 any
+
+2.)
+int s2/0
+ip nat inside
+
+int f1/0
+ip nat inside
+
+int f1/1
+ip nat outside
+
+3.)
+ip nat inside source list NAT interface FastEthernet1/1 overload	*** interface koji gleda prema internetu
+ip route 0.0.0.0 0.0.0.0 204.223.14.254		*** defaultna ruta prema interface-u koji gleda prema internetu
+
+4.)
+ako je OSPF u mreži i ako je serijski link
+
+OSPF:
+default-information originate metric 10
+
+INTERFACE:
+inf s2/0
+bandwith 100000
+clock rate 64000
